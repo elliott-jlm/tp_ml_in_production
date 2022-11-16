@@ -1,13 +1,23 @@
 import React, { useState } from "react";
-import TaskDataService from "../services/task.service";
+import {createTask} from "../services/task.service";
 
-const handleSubmit = (state, setState) => {
-	var data = {
+
+export const AddTask = (  ) => {
+	const [state, setState] = useState({
+		id: null,
+		title: "",
+		description: "",
+		published: false,
+		submitted: false,
+	});
+
+	
+const handleSubmit = () => {
+	let data = {
 		title: state.title,
 		description: state.description,
 	};
-
-	TaskDataService.create(data)
+	createTask(data)
 		.then((response) => {
 			setState({
 				id: response.data.id,
@@ -24,18 +34,11 @@ const handleSubmit = (state, setState) => {
 		});
 };
 
-const AddTask = ({ onSubmit = handleSubmit, ...props }) => {
-	const [state, setState] = useState({
-		id: null,
-		title: "",
-		description: "",
-		published: false,
-		submitted: false,
-	});
+	
 
 	const saveTask = (e) => {
 		e.preventDefault();
-		onSubmit(state, setState);
+		handleSubmit();
 	};
 	const onChangeTitle = (e) => {
 		setState({ ...state, title: e.target.value });
@@ -101,4 +104,3 @@ const AddTask = ({ onSubmit = handleSubmit, ...props }) => {
 		</div>
 	);
 };
-export default AddTask;

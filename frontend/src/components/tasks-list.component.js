@@ -1,96 +1,79 @@
-import React, { Component } from "react";
-import TaskDataService from "../services/task.service";
+import React, { useEffect, useState } from 'react';
+import {getAllTasks,deleteAllTasks,findTaskByTitle} from "../services/task.service";
 import { Link } from "react-router-dom";
 
-export default class TasksList extends Component {
-	constructor(props) {
-		super(props);
-		this.onChangeSearchTitle = this.onChangeSearchTitle.bind(this);
-		this.retrieveTasks = this.retrieveTasks.bind(this);
-		this.refreshList = this.refreshList.bind(this);
-		this.setActiveTask = this.setActiveTask.bind(this);
-		this.removeAllTasks = this.removeAllTasks.bind(this);
-		this.searchTitle = this.searchTitle.bind(this);
+export const TasksList= (props) => {
 
-		this.state = {
-			tasks: [],
-			currentTask: null,
-			currentIndex: -1,
-			searchTitle: "",
-		};
-	}
 
-	componentDidMount() {
-		this.retrieveTasks();
-	}
+	useEffect(() => {
+		retrieveTasks();
+	  }, []);
 
-	onChangeSearchTitle(e) {
+	const [searchTitle, setSearchTitle] = useState("");
+	const [tasks, setTasks] = useState([]);
+	const [currentTask, setCurrentTask] = useState({
+		index:0,
+		title:"",
+		description:""
+	});
+
+	const onChangeSearchTitle = (e) => {
 		const searchTitle = e.target.value;
-
-		this.setState({
-			searchTitle: searchTitle,
-		});
+		setSearchTitle(searchTitle);
 	}
 
-	retrieveTasks() {
-		TaskDataService.getAll()
+	const retrieveTasks = () => {
+		getAllTasks()
 			.then((response) => {
-				this.setState({
-					tasks: response.data,
-				});
 				console.log(response.data);
+				setTasks(response.data);
 			})
 			.catch((e) => {
 				console.log(e);
 			});
 	}
 
-	refreshList() {
-		this.retrieveTasks();
-		this.setState({
-			currentTask: null,
-			currentIndex: -1,
+	const refreshList = () => {
+		retrieveTasks();
+		setCurrentTask({
+			title: "",
+			description: "",
+			index: -1,
 		});
 	}
 
-	setActiveTask(task, index) {
-		this.setState({
-			currentTask: task,
-			currentIndex: index,
-		});
+	const setActiveTask = (task, index) => {
+		console.log("setting",task)
+		setCurrentTask(
+			{...task,index});
 	}
 
-	removeAllTasks() {
-		TaskDataService.deleteAll()
+	const removeAllTasks = () => {
+		deleteAllTasks()
 			.then((response) => {
 				console.log(response.data);
-				this.refreshList();
+				refreshList();
 			})
 			.catch((e) => {
 				console.log(e);
 			});
 	}
 
-	searchTitle() {
-		this.setState({
-			currentTask: null,
-			currentIndex: -1,
+	const doSearchTitle = () => {
+		setCurrentTask({
+			task: null,
+			index: -1,
 		});
 
-		TaskDataService.findByTitle(this.state.searchTitle)
+		findTaskByTitle(searchTitle)
 			.then((response) => {
-				this.setState({
-					tasks: response.data,
-				});
+				setTasks(response.data);
 				console.log(response.data);
 			})
 			.catch((e) => {
 				console.log(e);
 			});
 	}
-
-	render() {
-		const { searchTitle, tasks, currentTask, currentIndex } = this.state;
 
 		return (
 			<div className="list row">
@@ -127,13 +110,13 @@ export default class TasksList extends Component {
 							className="form-control"
 							placeholder="Search by title"
 							value={searchTitle}
-							onChange={this.onChangeSearchTitle}
+							onChange={onChangeSearchTitle}
 						/>
 						<div className="input-group-append">
 							<button
 								className="btn btn-outline-secondary"
 								type="button"
-								onClick={this.searchTitle}
+								onClick={doSearchTitle}
 							>
 								Search
 							</button>
@@ -145,32 +128,32 @@ export default class TasksList extends Component {
 
 					<ul className="list-group">
 						{tasks &&
-							tasks.map((task, index) => (
+							tasks.map((_task, _index) => (
 								<li
 									className={
 										"list-group-item " +
-										(index === currentIndex ? "active" : "")
+										(_index === currentTask.index ? "active" : "")
 									}
-									data-index={index}
+									data-index={_index}
 									onClick={() =>
-										this.setActiveTask(task, index)
+										setActiveTask(_task, _index)
 									}
-									key={index}
+									key={_index}
 								>
-									{task.title}
+									{_task.title}
 								</li>
 							))}
 					</ul>
 
 					<button
 						className="m-3 btn btn-sm btn-danger"
-						onClick={this.removeAllTasks}
+						onClick={removeAllTasks}
 					>
 						Remove All
 					</button>
 				</div>
 				<div className="col-md-6">
-					{currentTask ? (
+					{currentTask.index ? (
 						<div>
 							<h4>Task</h4>
 							<div>
@@ -212,4 +195,4 @@ export default class TasksList extends Component {
 			</div>
 		);
 	}
-}
+

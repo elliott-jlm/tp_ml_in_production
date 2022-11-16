@@ -1,61 +1,43 @@
-import React, { Component } from "react";
-import TaskDataService from "../services/task.service";
+import React,  { useEffect, useState } from "react";
+import {getTask,updateTask,deleteTask} from "../services/task.service";
 
-export default class Task extends Component {
-  constructor(props) {
-    super(props);
-    this.onChangeTitle = this.onChangeTitle.bind(this);
-    this.onChangeDescription = this.onChangeDescription.bind(this);
-    this.getTask = this.getTask.bind(this);
-    this.updatePublished = this.updatePublished.bind(this);
-    this.updateTask = this.updateTask.bind(this);
-    this.deleteTask = this.deleteTask.bind(this);
+export const Task = (props) => {
 
-    this.state = {
-      currentTask: {
-        id: null,
-        title: "",
-        description: "",
-        published: false
-      },
-      message: ""
-    };
-  }
+  useEffect(() => {
+		getTask(props.match.params.id)
+	  }, []);
 
-  componentDidMount() {
-    this.getTask(this.props.match.params.id);
-  }
+    
+	const [currentTask, setCurrentTask] = useState({
+    id: null,
+    title: "",
+    description: "",
+    published: false
+  });
+	const [message, setMessage] = useState("");
+ 
 
-  onChangeTitle(e) {
+  const onChangeTitle = (e)=> {
     const title = e.target.value;
 
-    this.setState(function(prevState) {
-      return {
-        currentTask: {
-          ...prevState.currentTask,
-          title: title
-        }
-      };
-    });
+    setCurrentTask({
+        ...currentTask,
+        title: title
+    })
   }
 
-  onChangeDescription(e) {
+  const onChangeDescription = (e) => {
     const description = e.target.value;
-    
-    this.setState(prevState => ({
-      currentTask: {
-        ...prevState.currentTask,
-        description: description
-      }
-    }));
+    setCurrentTask({
+      ...currentTask,
+      description: description
+    })
   }
 
-  getTask(id) {
-    TaskDataService.get(id)
+  const getTask = (id) => {
+    getTask(id)
       .then(response => {
-        this.setState({
-          currentTask: response.data
-        });
+        setCurrentTask(response.data);
         console.log(response.data);
       })
       .catch(e => {
@@ -63,22 +45,21 @@ export default class Task extends Component {
       });
   }
 
-  updatePublished(status) {
+  const updatePublished = (status) => {
     var data = {
-      id: this.state.currentTask.id,
-      title: this.state.currentTask.title,
-      description: this.state.currentTask.description,
+      id: currentTask.id,
+      title: currentTask.title,
+      description: currentTask.description,
       published: status
     };
 
-    TaskDataService.update(this.state.currentTask.id, data)
+    updateTask(this.state.currentTask.id, data)
       .then(response => {
-        this.setState(prevState => ({
-          currentTask: {
-            ...prevState.currentTask,
+        this.setCurrentTask({
+          ...currentTask,
             published: status
           }
-        }));
+        );
         console.log(response.data);
       })
       .catch(e => {
@@ -86,35 +67,33 @@ export default class Task extends Component {
       });
   }
 
-  updateTask() {
-    TaskDataService.update(
-      this.state.currentTask.id,
-      this.state.currentTask
+  const updateTask = () => {
+    updateTask(
+      currentTask.id,
+      currentTask
     )
       .then(response => {
         console.log(response.data);
-        this.setState({
-          message: "The task was updated successfully!"
-        });
+        setMessage(
+          "The task was updated successfully!"
+        );
       })
       .catch(e => {
         console.log(e);
       });
   }
 
-  deleteTask() {    
-    TaskDataService.delete(this.state.currentTask.id)
+  const deleteTask = () => {    
+    deleteTask(this.state.currentTask.id)
       .then(response => {
         console.log(response.data);
-        this.props.history.push('/tasks')
+        props.history.push('/tasks')
       })
       .catch(e => {
         console.log(e);
       });
   }
 
-  render() {
-    const { currentTask } = this.state;
 
     return (
       <div>
@@ -191,5 +170,4 @@ export default class Task extends Component {
         )}
       </div>
     );
-  }
 }

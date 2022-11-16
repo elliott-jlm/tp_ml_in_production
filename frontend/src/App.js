@@ -1,15 +1,14 @@
-import React, { Component } from "react";
-import { Switch, Route, Link } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import logo from './assets/images/logo-efrei.png';
 
-import AddTask from "./components/add-task.component";
-import Task from "./components/task.component";
-import TasksList from "./components/tasks-list.component";
+import {AddTask} from "./components/add-task.component";
+import {Task} from "./components/task.component";
+import {TasksList} from "./components/tasks-list.component";
 
-class App extends Component {
-  render() {
+const App = () => {
     return (
       <div>
         <nav className="navbar navbar-expand navbar-dark bg-dark">
@@ -29,15 +28,17 @@ class App extends Component {
         </nav>
 
         <div className="container mt-3">
-          <Switch>
-            <Route exact path={["/", "/tasks"]} component={TasksList} />
-            <Route exact path="/add" component={AddTask} />
-            <Route path="/tasks/:id" component={Task} />
-          </Switch>
+  
+          <Routes>
+            <Route  path={"/"} element={<TasksList/>} />
+            <Route  path={"tasks"} element={<TasksList/>} />
+            <Route  path="/add" element={<AddTask/>} />
+            <Route path="/tasks/:id" element={<Task/>} />
+          </Routes>
+
         </div>
       </div>
     );
-  }
-}
+};
 
 export default App;

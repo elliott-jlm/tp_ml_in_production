@@ -4,6 +4,7 @@ const Task = db.tasks;
 // Create and Save a new Task
 exports.create = (req, res) => {
   // Validate request
+  console.log("ttt",req)
   if (!req.body.title) {
     res.status(400).send({ message: "Content can not be empty!" });
     return;
